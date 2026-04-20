@@ -541,7 +541,7 @@ with tab1:
                     # Exibir botão de download
                     st.success("✅ Orçamento gerado com sucesso!")
                     
-                    nome_arquivo = f"{limpar_texto(cliente)}_orcamento.pdf"
+                    nome_arquivo = f"{limpar_texto(cliente)}.pdf"
                     
                     st.download_button(
                         label="⬇️ Baixar PDF",
