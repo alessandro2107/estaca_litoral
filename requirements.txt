@@ -1,2 +1,2 @@
-streamlit==1.36.0
-fpdf2==2.7.0
+streamlit
+fpdf2
