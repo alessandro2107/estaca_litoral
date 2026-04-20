@@ -263,7 +263,7 @@ def gerar_orcamento_pdf(cliente, endereco_obra, budget_number, metros_lineares,
     pdf.ln(5)
     
     pdf.set_font("Helvetica", "", 12)
-    pdf.multi_cell(0, 4, "Nota: Nota Fiscal acresce 22% ao valor total.")
+    pdf.multi_cell(0, 4, "Nota: Nota Fiscal acresce 22% ao valor total\nART acresse R$ 1500,00 ao valor total.")
     pdf.ln(8)
     
     # ====== ASSINATURAS ======
