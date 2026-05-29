@@ -10,6 +10,34 @@ def formatar_moeda(valor):
     """Formata valor como moeda brasileira"""
     return f"R$ {valor:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
 
+
+def ajustar_texto_para_pdf(pdf, texto, max_width=None):
+    """Insere quebras em palavras muito longas para evitar erro de largura no FPDF."""
+    if max_width is None:
+        max_width = pdf.w - pdf.l_margin - pdf.r_margin
+    if not texto:
+        return texto
+
+    partes = []
+    for palavra in texto.split(" "):
+        if pdf.get_string_width(palavra) <= max_width:
+            partes.append(palavra)
+            continue
+
+        fragmento = ""
+        for char in palavra:
+            if pdf.get_string_width(fragmento + char) > max_width:
+                if fragmento:
+                    partes.append(fragmento)
+                fragmento = char
+            else:
+                fragmento += char
+        if fragmento:
+            partes.append(fragmento)
+
+    return " ".join(partes)
+
+
 def limpar_texto(texto):
     """Remove caracteres especiais que fpdf nao suporta"""
     mapa = {
@@ -32,7 +60,7 @@ def limpar_texto(texto):
 
 def gerar_orcamento_pdf(cliente, endereco_obra, budget_number, metros_lineares, 
                         preco_por_metro=38.00, valor_mobilizacao=0, 
-                        nome_responsavel="Alesxandro Rodrigues Da Silva", valor_fixo=None,
+                        nome_responsavel="Alesxandro Rodrigues Da Silva", diametro=30, valor_fixo=None,
                         com_nf=False, com_art=False, telefone_cliente="", 
                         Qnt_estacas="", profundidade="",
                         valor_fixo_até_metros=None, metros_limite=None, preco_metros_excedentes=None):
@@ -140,12 +168,19 @@ def gerar_orcamento_pdf(cliente, endereco_obra, budget_number, metros_lineares,
     pdf.set_text_color(0, 0, 0)
     
     pdf.set_font("Helvetica", "", 9.5)
-    escopo = f"Perfuracao para {Qnt_estacas} estacas do tipo Strauss, com diametro de 30 cm"
+    escopo = f"Perfuracao para {Qnt_estacas} estacas do tipo Strauss, com diametro de {diametro} cm"
     if profundidade:
         escopo += f" e profundidade {profundidade} mts conforme especificado."
     else:
         escopo += " conforme especificado."
-    pdf.multi_cell(0, 4, escopo)
+    largura = pdf.w - pdf.l_margin - pdf.r_margin
+    pdf.set_x(pdf.l_margin)
+    pdf.multi_cell(largura, 4, ajustar_texto_para_pdf(pdf, escopo))
+    pdf.set_x(pdf.l_margin)
+    if diametro == 30:
+        pdf.multi_cell(largura, 4, ajustar_texto_para_pdf(pdf, "camisa 27cm estaca pronta 32cm"))
+    else:
+        pdf.multi_cell(largura, 4, ajustar_texto_para_pdf(pdf, "camisa 32 estaca pronta 40cm"))
     pdf.ln(5)
     
     # ====== TABELA DE VALORES ======
@@ -217,7 +252,7 @@ def gerar_orcamento_pdf(cliente, endereco_obra, budget_number, metros_lineares,
     if valor_fixo_até_metros is not None and metros_limite is not None and preco_metros_excedentes is not None:
         pdf.set_font("Helvetica", "B", 10.5)
         pdf.set_text_color(102, 102, 102)
-        pdf.multi_cell(0, 3, f"Apos {metros_limite} metros lineares, sera cobrado o valor excedente de {formatar_moeda(preco_metros_excedentes)} por metro perfurado.")
+        pdf.multi_cell(pdf.w - pdf.l_margin - pdf.r_margin, 3, ajustar_texto_para_pdf(pdf, f"Apos {metros_limite} metros lineares, sera cobrado o valor excedente de {formatar_moeda(preco_metros_excedentes)} por metro perfurado."))
         pdf.set_text_color(0, 0, 0)
     pdf.ln(5)
     
@@ -231,7 +266,7 @@ def gerar_orcamento_pdf(cliente, endereco_obra, budget_number, metros_lineares,
     pdf.set_fill_color(232, 244, 248)
     pdf.ln(2)
     tex_pagamento = f"Meios: Dinheiro ou PIX. (13) 996788265 |  Forma: 40% de entrada ({formatar_moeda(entrada_40)}) e 60% na conclusao ({formatar_moeda(conclusao_60)})."
-    pdf.multi_cell(0, 5, tex_pagamento, fill=True)
+    pdf.multi_cell(pdf.w - pdf.l_margin - pdf.r_margin, 5, ajustar_texto_para_pdf(pdf, tex_pagamento), fill=True)
     
     pdf.ln(3)
     notas = []
@@ -243,7 +278,7 @@ def gerar_orcamento_pdf(cliente, endereco_obra, budget_number, metros_lineares,
     if notas:
         nota_adicionais = "Adicionais inclusos: " + " | ".join(notas)
         pdf.set_fill_color(230, 248, 255)
-        pdf.multi_cell(0, 4, nota_adicionais, fill=True)
+        pdf.multi_cell(0, 4, ajustar_texto_para_pdf(pdf, nota_adicionais), fill=True)
         pdf.ln(3)
     else:
         pdf.set_fill_color(230, 248, 255)
@@ -447,6 +482,7 @@ with tab1:
             st.subheader("Obra", divider=True)
             qnt_estacas = st.text_input("Quantidade de estacas", value="", placeholder="Ex: 10", key="est")
             profundidade = st.text_input("Profundidade", value="", placeholder="Ex: 8m", key="prof")
+            diametro = st.selectbox("Diâmetro da estaca", options=[30, 40], index=0, key="diam")
             numero_orcamento = st.text_input("Nº Orçamento", value=datetime.now().strftime("%d%m%Y"), key="nro")
     
     # Seção 2: Opções de Cálculo
@@ -527,6 +563,7 @@ with tab1:
                         preco_por_metro=preco_metro,
                         valor_mobilizacao=valor_mobilizacao,
                         nome_responsavel=nome_responsavel,
+                        diametro=diametro,
                         valor_fixo=valor_fixo,
                         com_nf=com_nf,
                         com_art=com_art,
