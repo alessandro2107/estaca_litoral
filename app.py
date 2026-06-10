@@ -375,18 +375,28 @@ def gerar_orcamento_pdf(cliente, endereco_obra, budget_number, metros_lineares,
     pdf.ln(2)
     
     # Ferragem
-    pdf.set_font("Helvetica", "B", 9)
-    pdf.cell(0, 5, "Ferragem:", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
-    pdf.set_font("Helvetica", "", 9)
-    pdf.cell(0, 5, "Cada estaca devera conter:", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
+    pdf.set_font("Helvetica", "B", 10)
+    pdf.cell(0, 5, "Ferragem (Por Estaca):", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
     pdf.ln(1)
-    pdf.cell(5, 4, "", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
-    pdf.cell(5, 4, "")
-    pdf.cell(0, 4, "01 coluna com 4 ferros de 3 metros de comprimento", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
-    pdf.cell(5, 4, "")
-    pdf.cell(0, 4, "Estribos redondos com diametro maximo de 20 cm", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
-    pdf.cell(5, 4, "")
-    pdf.cell(0, 4, "Espacamento entre estribos: 20 cm", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
+    
+    # Opção Recomendada
+    pdf.set_font("Helvetica", "B", 9)
+    pdf.cell(5, 5, "")
+    pdf.cell(0, 5, "OPCAO RECOMENDADA (MATERIAL SOLTO):", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
+    pdf.set_font("Helvetica", "", 9)
+    pdf.cell(10, 5, "")
+    pdf.cell(0, 5, "- 04 pedacos de ferro 3/8 com 3 metros de comprimento (sem estribos).", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
+    pdf.ln(2)
+    
+    # Opção Pronta
+    pdf.set_font("Helvetica", "B", 9)
+    pdf.cell(5, 5, "")
+    pdf.cell(0, 5, "OPCAO FERRAGEM PRONTA (CASO O CLIENTE QUEIRA ENTREGAR MONTADA):", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
+    pdf.set_font("Helvetica", "B", 9)
+    pdf.set_text_color(200, 0, 0) # Cor de destaque
+    pdf.cell(10, 5, "")
+    pdf.multi_cell(0, 5, "ATENCAO: Caso a ferragem seja entregue montada, DEVE CONTER OS ESTRIBOS (20cm de diametro / espacamento de 20cm).")
+    pdf.set_text_color(0, 0, 0)
     pdf.ln(2)
     
     # Cimento
