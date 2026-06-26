@@ -52,7 +52,8 @@ def limpar_texto(texto):
         'Í': 'I', 'Ì': 'I',
         'Ó': 'O', 'Ò': 'O', 'Ô': 'O', 'Õ': 'O',
         'Ú': 'U', 'Ù': 'U',
-        'Ç': 'C'
+        'Ç': 'C',
+        '–': '-', '—': '-', '“': '"', '”': '"', '‘': "'", '’': "'"
     }
     for char, replacement in mapa.items():
         texto = texto.replace(char, replacement)
@@ -104,10 +105,7 @@ def gerar_orcamento_pdf(cliente, endereco_obra, budget_number, metros_lineares,
     pdf = FPDF(orientation='P', unit='mm', format='A4')
     pdf.set_auto_page_break(auto=True, margin=20)
     
-    # Registrar fonte DejaVu para suporte a acentos
-    pdf.add_font("DejaVu", "", "fonts/DejaVuSans.ttf", uni=True)
-    pdf.add_font("DejaVu", "B", "fonts/DejaVuSans-Bold.ttf", uni=True)
-    
+    # Usar fontes padrão do FPDF para evitar dependência de arquivos externos
     pdf.add_page()
     
     # ====== CABEÇALHO ELEGANTE — FUNDO AZUL ======
@@ -134,22 +132,22 @@ def gerar_orcamento_pdf(cliente, endereco_obra, budget_number, metros_lineares,
     pdf.set_xy(pdf.l_margin, y_header + pad_top)
     
     # Nome da empresa
-    pdf.set_font("DejaVu", "B", 22)
+    pdf.set_font("Helvetica", "B", 22)
     pdf.set_text_color(255, 255, 255)
     pdf.cell(0, h_nome, "ESTACA LITORAL", new_x=XPos.LMARGIN, new_y=YPos.NEXT, align="L")
     pdf.ln(1)
     
     # Tagline / Subtítulo (em tom suave)
-    pdf.set_font("DejaVu", "", 9.5)
+    pdf.set_font("Helvetica", "", 9.5)
     pdf.set_text_color(210, 200, 180)  # bege claro
-    pdf.cell(0, h_tag, "Perfuração de Estacas Strauss — Baixada Santista", new_x=XPos.LMARGIN, new_y=YPos.NEXT, align="L")
+    pdf.cell(0, h_tag, limpar_texto("Perfuração de Estacas Strauss — Baixada Santista"), new_x=XPos.LMARGIN, new_y=YPos.NEXT, align="L")
     pdf.ln(gap_tag)
     
     # Bloco de contato compacto
     pdf.set_text_color(255, 255, 255)
-    pdf.set_font("DejaVu", "", 8.5)
-    pdf.cell(0, h_contato, "CNPJ: 45.248.080/0001-37  |  Avenida Sambaiatuba, 2107 - Jockey Clube, São Vicente - SP, CEP 11365-140", new_x=XPos.LMARGIN, new_y=YPos.NEXT, align="L")
-    pdf.cell(0, h_contato, "(13) 99678-8265  |  rodriguesalesxandro@gmail.com  |  www.estacalitoral.com.br  |  IG: @estaca_straus", new_x=XPos.LMARGIN, new_y=YPos.NEXT, align="L")
+    pdf.set_font("Helvetica", "", 8.5)
+    pdf.cell(0, h_contato, limpar_texto("CNPJ: 45.248.080/0001-37  |  Avenida Sambaiatuba, 2107 - Jockey Clube, São Vicente - SP, CEP 11365-140"), new_x=XPos.LMARGIN, new_y=YPos.NEXT, align="L")
+    pdf.cell(0, h_contato, limpar_texto("(13) 99678-8265  |  rodriguesalesxandro@gmail.com  |  www.estacalitoral.com.br  |  IG: @estaca_straus"), new_x=XPos.LMARGIN, new_y=YPos.NEXT, align="L")
     
     # Avançar o cursor para depois do banner
     pdf.set_y(y_header + altura_banner + 3)
@@ -167,18 +165,18 @@ def gerar_orcamento_pdf(cliente, endereco_obra, budget_number, metros_lineares,
     # Segunda linha (direita)
     pdf.line(centro + 6, y_div, margem + largura, y_div)
     # Losango decorativo no centro
-    pdf.set_font("DejaVu", "", 8)
+    pdf.set_font("Helvetica", "", 8)
     pdf.set_text_color(*COR_SECUNDARIA)
     pdf.set_xy(centro - 2.5, y_div - 3.5)
-    pdf.cell(5, 3, "\u25C6", align="C")  # ◆ (losango)
+    pdf.cell(5, 3, "-", align="C")
     
     pdf.ln(6)
     
     # ====== TITULO ======
-    pdf.set_font("DejaVu", "B", 12)
+    pdf.set_font("Helvetica", "B", 12)
     pdf.set_text_color(255, 255, 255)
     pdf.set_fill_color(*COR_PRIMARIA)
-    pdf.cell(0, 7, "ORÇAMENTO DE PRESTAÇÃO DE SERVIÇOS", new_x=XPos.LMARGIN, new_y=YPos.NEXT, align="C", fill=True)
+    pdf.cell(0, 7, limpar_texto("ORÇAMENTO DE PRESTAÇÃO DE SERVIÇOS"), new_x=XPos.LMARGIN, new_y=YPos.NEXT, align="C", fill=True)
     pdf.set_text_color(0, 0, 0)
     pdf.ln(6)
     
