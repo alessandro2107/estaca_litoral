@@ -103,29 +103,83 @@ def gerar_orcamento_pdf(cliente, endereco_obra, budget_number, metros_lineares,
     # Criar PDF em memória
     pdf = FPDF(orientation='P', unit='mm', format='A4')
     pdf.set_auto_page_break(auto=True, margin=20)
+    
+    # Registrar fonte DejaVu para suporte a acentos
+    pdf.add_font("DejaVu", "", "fonts/DejaVuSans.ttf", uni=True)
+    pdf.add_font("DejaVu", "B", "fonts/DejaVuSans-Bold.ttf", uni=True)
+    
     pdf.add_page()
-    pdf.set_font("Helvetica", "", 10)
     
-    # ====== CABEÇALHO ======
-    pdf.set_font("Helvetica", "B", 18)
-    pdf.cell(0, 8, "ESTACA LITORAL", new_x=XPos.LMARGIN, new_y=YPos.NEXT, align="C")
+    # ====== CABEÇALHO ELEGANTE — FUNDO AZUL ======
+    COR_PRIMARIA = (16, 49, 74)     # Azul escuro navy
+    COR_SECUNDARIA = (200, 170, 110) # Dourado elegante (usado no divisor)
     
-    pdf.set_font("Helvetica", "", 9)
-    pdf.cell(0, 5, "CNPJ: 45.248.080/0001-37", new_x=XPos.LMARGIN, new_y=YPos.NEXT, align="C")
-    pdf.cell(0, 5, "Avenida Sambaiatuba, 2107 - Jockey Clube, Sao Vicente - SP, CEP 11365-140", 
-             new_x=XPos.LMARGIN, new_y=YPos.NEXT, align="C")
-    pdf.cell(0, 5, "(13) 99678-8265 | rodriguesalesxandro@gmail.com", new_x=XPos.LMARGIN, new_y=YPos.NEXT, align="C")
-    pdf.cell(0, 5, "www.estacalitoral.com.br | IG: @estaca_straus", new_x=XPos.LMARGIN, new_y=YPos.NEXT, align="C")
+    # Posição inicial do cabeçalho
+    y_header = pdf.get_y()
     
-    # Linha divisória
-    pdf.set_draw_color(44, 62, 80)
-    pdf.line(20, pdf.get_y() + 2, 190, pdf.get_y() + 2)
-    pdf.ln(8)
+    # Alturas dos elementos
+    pad_top = 4
+    h_nome = 10
+    h_tag = 5
+    gap_tag = 2.5
+    h_contato = 4
+    pad_bottom = 3
+    altura_banner = pad_top + h_nome + 1 + h_tag + gap_tag + h_contato + h_contato + pad_bottom  # ~33.5mm
+    
+    # Desenhar banner azul full-width (borda a borda)
+    pdf.set_fill_color(*COR_PRIMARIA)
+    pdf.rect(0, y_header, 210, altura_banner, 'F')
+    
+    # --- Conteúdo do cabeçalho (texto branco sobre fundo azul) ---
+    pdf.set_xy(pdf.l_margin, y_header + pad_top)
+    
+    # Nome da empresa
+    pdf.set_font("DejaVu", "B", 22)
+    pdf.set_text_color(255, 255, 255)
+    pdf.cell(0, h_nome, "ESTACA LITORAL", new_x=XPos.LMARGIN, new_y=YPos.NEXT, align="L")
+    pdf.ln(1)
+    
+    # Tagline / Subtítulo (em tom suave)
+    pdf.set_font("DejaVu", "", 9.5)
+    pdf.set_text_color(210, 200, 180)  # bege claro
+    pdf.cell(0, h_tag, "Perfuração de Estacas Strauss — Baixada Santista", new_x=XPos.LMARGIN, new_y=YPos.NEXT, align="L")
+    pdf.ln(gap_tag)
+    
+    # Bloco de contato compacto
+    pdf.set_text_color(255, 255, 255)
+    pdf.set_font("DejaVu", "", 8.5)
+    pdf.cell(0, h_contato, "CNPJ: 45.248.080/0001-37  |  Avenida Sambaiatuba, 2107 - Jockey Clube, São Vicente - SP, CEP 11365-140", new_x=XPos.LMARGIN, new_y=YPos.NEXT, align="L")
+    pdf.cell(0, h_contato, "(13) 99678-8265  |  rodriguesalesxandro@gmail.com  |  www.estacalitoral.com.br  |  IG: @estaca_straus", new_x=XPos.LMARGIN, new_y=YPos.NEXT, align="L")
+    
+    # Avançar o cursor para depois do banner
+    pdf.set_y(y_header + altura_banner + 3)
+    
+    # Divisor elegante: linha dupla com losango
+    y_div = pdf.get_y()
+    margem = pdf.l_margin
+    largura = pdf.w - margem - pdf.r_margin
+    centro = margem + largura / 2
+    
+    # Primeira linha (esquerda)
+    pdf.set_draw_color(*COR_PRIMARIA)
+    pdf.set_line_width(0.3)
+    pdf.line(margem, y_div, centro - 6, y_div)
+    # Segunda linha (direita)
+    pdf.line(centro + 6, y_div, margem + largura, y_div)
+    # Losango decorativo no centro
+    pdf.set_font("DejaVu", "", 8)
+    pdf.set_text_color(*COR_SECUNDARIA)
+    pdf.set_xy(centro - 2.5, y_div - 3.5)
+    pdf.cell(5, 3, "\u25C6", align="C")  # ◆ (losango)
+    
+    pdf.ln(6)
     
     # ====== TITULO ======
-    pdf.set_font("Helvetica", "B", 14)
-    pdf.set_fill_color(242, 242, 242)
-    pdf.cell(0, 8, "ORCAMENTO DE PRESTACAO DE SERVICOS", new_x=XPos.LMARGIN, new_y=YPos.NEXT, align="C", fill=True)
+    pdf.set_font("DejaVu", "B", 12)
+    pdf.set_text_color(255, 255, 255)
+    pdf.set_fill_color(*COR_PRIMARIA)
+    pdf.cell(0, 7, "ORÇAMENTO DE PRESTAÇÃO DE SERVIÇOS", new_x=XPos.LMARGIN, new_y=YPos.NEXT, align="C", fill=True)
+    pdf.set_text_color(0, 0, 0)
     pdf.ln(6)
     
     # ====== INFORMAÇÕES BÁSICAS ======
@@ -470,9 +524,29 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.title("📋 Gerador de Orçamentos")
-st.markdown("**Estaca Litoral**")
-st.markdown("---")
+st.markdown("""
+    <div style="width:100%; background:#14314a; color:#fff; padding:14px 18px; box-sizing:border-box;">
+        <div style="display:flex; align-items:center; justify-content:space-between;">
+            <div class="header-flex">
+                <div class="header-left">
+                    <div class="vertical-title">ESTACA LITORAL</div>
+                </div>
+                <div class="header-center">
+                    <div style="font-size:20px; font-weight:700">ESTACA LITORAL</div>
+                    <div class="header-sub">Perfuração de estacas Strauss — Baixada Santista</div>
+                </div>
+                <div class="header-right">
+                    <div><strong>CNPJ:</strong> 45.248.080/0001-37</div>
+                    <div>Avenida Sambaiatuba, 2107 — Jockey Clube</div>
+                    <div>São Vicente — SP • CEP 11365-140</div>
+                    <div>(13) 99678-8265 • rodriguesalesxandro@gmail.com</div>
+                    <div>www.estacalitoral.com.br • IG: @estaca_straus</div>
+                </div>
+            </div>
+            <div class="accent-bar"></div>
+        </div>
+""", unsafe_allow_html=True)
+st.markdown("\n")
 
 # Criar abas
 tab1, tab2 = st.tabs(["📊 Orçamento", "ℹ️ Sobre"])
